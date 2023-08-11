@@ -16,7 +16,6 @@ const MovieApp = () => {
   const postMovieReview = useSubmitMovieReview();
 
   const loadInitial = useCallback(async () => {
-    console.log("A");
     setIsLoading(true);
     const movies = await loadMovies();
     const withCmpnyId = await loadCompanies(movies);
