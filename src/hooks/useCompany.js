@@ -1,27 +1,32 @@
+import { useSnackbar } from "notistack";
 import { useCallback } from "react";
 import useRequest from "./useRequest";
 
 const useCompany = () => {
-  const { get, response } = useRequest();
+  const { get } = useRequest();
+  const { enqueueSnackbar } = useSnackbar();
 
   const loadCompanies = useCallback(
     async (movies) => {
-      const companies = await get("/movieCompanies");
-      if (response.ok) {
+      try {
+        const { data } = await get("/movieCompanies");
         const movieWithCompanyName = movies.map(
           ({ filmCompanyId, ...rest }) => {
-            const { name } = companies.find(({ id }) => id === filmCompanyId);
+            const { name } = data.find(({ id }) => id === filmCompanyId);
             return {
               ...rest,
-              name,
+              companyName: name,
             };
           }
         );
-
         return movieWithCompanyName;
+      } catch (error) {
+        enqueueSnackbar(`API failed with error: ${error}`, {
+          variant: "error",
+        });
       }
     },
-    [get, response]
+    [enqueueSnackbar, get]
   );
 
   return loadCompanies;

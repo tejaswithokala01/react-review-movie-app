@@ -1,58 +1,54 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { dummyMovies } from "./constants";
 import MovieTable from "./components/MovieTable";
 import ReviewModal from "./components/ReviewModal";
-import {
-  useCompany,
-  useMovies,
-  useRequest,
-  useSubmitMovieReview,
-} from "./hooks";
-import { useSnackbar } from "notistack";
+import { useCompany, useMovies, useSubmitMovieReview } from "./hooks";
 import { Backdrop, CircularProgress } from "@mui/material";
 
 const MovieApp = () => {
   const [movies, setMovies] = useState([]);
+  const [selectedRow, setSelectedRow] = useState([]);
+
   const [openModal, setOpenModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadCompanies = useCompany();
   const loadMovies = useMovies();
   const postMovieReview = useSubmitMovieReview();
 
-  const { loading, error } = useRequest();
-
-  const { enqueueSnackbar } = useSnackbar();
-
   const loadInitial = useCallback(async () => {
+    console.log("A");
+    setIsLoading(true);
     const movies = await loadMovies();
-    setMovies(movies);
-    const moviesWithCompanyName = await loadCompanies(movies);
-    setMovies(moviesWithCompanyName);
+    const withCmpnyId = await loadCompanies(movies);
+    setMovies(withCmpnyId);
+    setIsLoading(false);
   }, [loadCompanies, loadMovies]);
 
   useEffect(() => {
-    loadInitial();
-  }, [loadInitial]);
-
-  if (error) {
-    enqueueSnackbar(`API failed with error: ${error}`, {
-      variant: "error",
-    });
-  }
+    if (movies?.length <= 0) {
+      loadInitial();
+    }
+  }, [loadInitial, movies?.length]);
 
   return (
     <React.Fragment>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
+        open={isLoading}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      <MovieTable movies={dummyMovies} setOpenModal={setOpenModal} />
+      <MovieTable
+        movies={movies}
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        setOpenModal={setOpenModal}
+      />
       <ReviewModal
         openModal={openModal}
         setOpenModal={setOpenModal}
         postMovieReview={postMovieReview}
+        selectedItem={movies?.filter((item) => item?.id === selectedRow[0])}
       />
     </React.Fragment>
   );

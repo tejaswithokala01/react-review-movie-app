@@ -8,10 +8,17 @@ import {
   DialogContent,
   DialogActions,
   Box,
+  Alert,
 } from "@mui/material";
 
-const ReviewModal = ({ openModal, setOpenModal, postMovieReview }) => {
-    const [movieReview, setMovieReview] = useState("");
+const ReviewModal = ({
+  openModal,
+  setOpenModal,
+  postMovieReview,
+  selectedItem,
+}) => {
+  const [movieReview, setMovieReview] = useState("");
+  const moreThan100Chars = movieReview.length > 100;
 
   return (
     <Dialog
@@ -22,8 +29,16 @@ const ReviewModal = ({ openModal, setOpenModal, postMovieReview }) => {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <DialogTitle>Review Movie</DialogTitle>
+      <DialogTitle>
+        <b>Review Movie:</b> {selectedItem?.[0]?.title}
+      </DialogTitle>
       <DialogContent>
+        {moreThan100Chars && (
+          <Alert severity="error">
+            More than 100 characters not allowed! sorry.
+          </Alert>
+        )}
+
         <Box marginBottom={2}>
           <Typography variant="body">
             Have some review, please share!
@@ -36,7 +51,6 @@ const ReviewModal = ({ openModal, setOpenModal, postMovieReview }) => {
             onChange={({ target }) => setMovieReview(target.value)}
             label="Write your movie review"
             multiline
-            inputProps={{ maxLength: 100 }}
           />
         </Box>
       </DialogContent>
@@ -53,8 +67,12 @@ const ReviewModal = ({ openModal, setOpenModal, postMovieReview }) => {
           variant="contained"
           color="primary"
           autoFocus
-          disabled={!movieReview}
-          onClick={() => postMovieReview(movieReview)}
+          disabled={!movieReview || moreThan100Chars}
+          onClick={() => {
+            postMovieReview(movieReview);
+            setOpenModal(false);
+            setMovieReview("");
+          }}
         >
           Save
         </Button>

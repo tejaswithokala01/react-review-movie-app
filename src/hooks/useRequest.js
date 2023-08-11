@@ -1,28 +1,52 @@
-import { useFetch } from "use-http";
-import { useLocalStorage } from "usehooks-ts";
+import axios from "axios";
 
-function useRequest(overrideOptions) {
-  const [accessToken] = useLocalStorage("accessToken", "");
+axios.defaults.baseURL =
+  "https://comforting-starlight-f3456a.netlify.app/.netlify/functions";
+axios.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem("accessToken");
 
-  const fetch = useFetch(
-    "https://comforting-starlight-f3456a.netlify.app/.netlify/functions",
-    {
-      cachePolicy: "no-cache",
-      ...overrideOptions,
-      interceptors: {
-        request: async ({ options }) => {
-          if (options?.headers) {
-            options.headers.Authorization = `Bearer ${accessToken}`;
-          }
+    if (accessToken) {
+      try {
+        const token = JSON.parse(accessToken);
+        config.headers.Authorization = `Bearer ${token}`;
+      } catch (e) {}
+    }
 
-          return options;
-        },
-      },
-    },
-    []
-  );
+    if (!config.headers["Content-Type"]) {
+      config.headers["Content-Type"] = "application/json";
+    }
 
-  return { ...fetch };
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+axios.interceptors.response.use(
+  (response) => ({
+    ...response,
+    ok: true,
+  }),
+  (error) => {
+    if (error.response.status >= 500) {
+      return Promise.reject(
+        new Error({
+          ...error.response,
+          ok: false,
+        })
+      );
+    }
+
+    return Promise.resolve({
+      ...error.response,
+      ok: false,
+    });
+  }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function useRequest() {
+  return { ...axios };
 }
 
 export default useRequest;

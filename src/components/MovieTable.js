@@ -19,22 +19,21 @@ const columns = [
     id: "company",
     label: "Company",
     minWidth: 170,
-    //   align: 'right',
   },
   { id: "button", label: "Review Movie" },
 ];
 
-const MovieTable = ({ movies, setOpenModal }) => {
-  const [selectedRows, setSelectedRows] = useState([]);
-
+const MovieTable = ({ movies = [], setOpenModal, selectedRow, setSelectedRow }) => {
+    
     const handleRowSelect = (id) => {
-        if (selectedRows.includes(id)) {
-          setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
+        if (selectedRow.includes(id)) {
+          setSelectedRow(selectedRow.filter((rowId) => rowId !== id));
         } else {
-          setSelectedRows([id]);
+          setSelectedRow([id]);
           setOpenModal(true);
         }
       };
+
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
       <TableContainer sx={{ maxHeight: 440 }} component={Paper}>
@@ -57,7 +56,7 @@ const MovieTable = ({ movies, setOpenModal }) => {
               <TableRow hover key={item.id}>
                 <TableCell>{item.title}</TableCell>
                 <TableCell>{formatReview(item.reviews)}</TableCell>
-                <TableCell>Company name</TableCell>
+                <TableCell>{item.companyName}</TableCell>
                 <TableCell>
                   <Button
                     variant="contained"
