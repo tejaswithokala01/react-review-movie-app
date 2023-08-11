@@ -27,7 +27,7 @@ const MovieApp = () => {
     };
 
     loadInitial();
-  }, []);
+}, [loadCompanies, loadMovies]);
 
   return (
     <React.Fragment>
