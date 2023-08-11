@@ -15,19 +15,19 @@ const MovieApp = () => {
   const loadMovies = useMovies();
   const postMovieReview = useSubmitMovieReview();
 
-  const loadInitial = useCallback(async () => {
-    setIsLoading(true);
-    const movies = await loadMovies();
-    const withCmpnyId = await loadCompanies(movies);
-    setMovies(withCmpnyId);
-    setIsLoading(false);
-  }, [loadCompanies, loadMovies]);
 
   useEffect(() => {
-    if (movies?.length <= 0) {
-      loadInitial();
-    }
-  }, [loadInitial, movies?.length]);
+    const loadInitial = async () => {
+      console.log("AA");
+      setIsLoading(true);
+      const movies = await loadMovies();
+      const withCmpnyId = await loadCompanies(movies);
+      setMovies(withCmpnyId);
+      setIsLoading(false);
+    };
+
+    loadInitial();
+  }, []);
 
   return (
     <React.Fragment>
